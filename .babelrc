@@ -1,17 +1,6 @@
 {
     "presets": [
-        [
-            "@babel/preset-env",
-            {
-                useBuiltIns: "usage",
-                corejs: 3,
-                debug: false,
-                exclude: [
-                    "es.promise",
-                    "es.object.to-string"
-                ]
-            }
-        ],
+        "@babel/preset-env",
         "@babel/preset-typescript"
     ],
     "plugins": [

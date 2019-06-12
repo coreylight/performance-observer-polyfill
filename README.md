@@ -1,18 +1,70 @@
-# Performance-observer polyfill [![Travis Build Status][travis-img]][travis]
-This project provides some basic polyfill functions for some of the network-based performance-observer APIs
+<h1 align="center" style="border-bottom: none;">🔎 PerformanceObserver Polyfill</h1>
+<p align="center">
+  <a href="https://travis-ci.org/fastly/performance-observer-polyfill">
+    <img alt="Travis" src="https://img.shields.io/travis/fastly/performance-observer-polyfill/master.svg">
+  </a>
+  <a href="https://unpkg.com/@fastly/performance-observer-polyfill/polyfill">
+    <img src="https://img.badgesize.io/https://unpkg.com/@fastly/performance-observer-polyfill/polyfill/index.js?compression=gzip" alt="gzip size">
+  </a>
+  <a href="#badge">
+    <img alt="semantic-release" src="https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg">
+  </a>
+</p>
 
-[travis]: https://travis-ci.com/fastly/performance-observer-polyfill
-[travis-img]: https://travis-ci.com/fastly/performance-observer-polyfill?token=ADD-HERE
+The [`PerformanceObserver`](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceObserver) interface is a JavaScript API that can be used to observe the [Performance Timeline](https://www.w3.org/TR/performance-timeline-2/#dfn-performance-timeline) to be notified of new performance metrics as they are recorded.
+
+This polyfill allows consumers to use the `PerformanceObserver` interface within browser environments, which have basic Performance Timeline support (I.e. `window.performance.getEntries()`), but don't have observer support. 
+
+The polypill works by falling back to polling the Performance Timeline on a given interval and calling all subscribed observers with the resulting set of entires. 
 
 ## Quick links
-- [FAQ](#faq)
 - [Installation](#installation)
-- [Running](#running)
+- [Usage](#usage)
+- [Development](#development)
+- [License](#license)
 
 ## Installation
+```sh
+npm install --save @fastly/performance-observer-polyfill
+```
+
+## Usage: 
+
+### As a [polyfill](https://ponyfill.com/#polyfill)
+This automatically "installs" PerformanceObserverPolyfill as `window.PerformanceObserver()` if it detects PerformanceObserver isn't supported:
+
+```js
+import '@fastly/performance-observer-polyfill/polyfill'
+
+// PerformanceObserver is now available globally!
+const observer = new PerformanceObserver((list) => {});
+observer.observe({entryTypes: ['resource']});
+```
+
+### Usage: As a [ponyfill](https://github.com/sindresorhus/ponyfill)
+
+With a module bundler like [rollup](http://rollupjs.org) or [webpack](https://webpack.js.org),
+you can import `@fastly/performance-observer-polyfill` to use in your code without modifying any globals:
+
+```js
+// using JS Modules:
+import PerformanceObserver from '@fastly/performance-observer-polyfill'
+
+// or using CommonJS:
+const PerformanceObserver = require('@fastly/performance-observer-polyfill')
+
+// usage:
+const observer = new PerformanceObserver((list) => {});
+observer.observe({entryTypes: ['resource']})
+```
+
+## Caveats
+As the polypill implements the PerformanceObserver interface by falling back to polling the Performance Timeline via a call to `window.performance.getEntries()` we are limited to only expose timeline entry types that are supported by `getEntries()`. Therefore the polypill can only be used to observe the entry types: `navigation`, `resource` and `mark`. Newer entry types such as `paint` are only exposed by the native PerformanceObserver implementation and thus not polyfillable. 
+
+## Development
 
 ### Requirements
-- Node.js >= 10
+- Node.js >= 10a
 
 ### Install
 ```sh
@@ -34,20 +86,6 @@ A list of all commands and their description can be found below.
 | build:dev | Compiles the application for development                                                                       |
 | lint      | Lints the source files for style errors using ESLint and automatically formats the source files using prettier |
 | test      | Runs the unit test suite                                                                                       |
-
-
-## FAQ
-
-### What is it?
-Fastly Insights is an optional service deployed by some Fastly customers for network and performance monitoring and research purposes. It does not collect any personal data. We are only interested in your network, to make the internet work better.
-
-We collect information about HTTP and HTTPS network transactions, including: network routing, performance timing, and equipment characteristics. Measurements are recorded to analyze the performance of the Fastly network and overall state of the internet. 
-
-Insights.js is served via Fastly’s CDN. All collected data is sent back to the Fastly Insights service and log streamed using Fastly’s [log streaming](https://docs.fastly.com/guides/streaming-logs/) to a Fastly managed data warehouse for subsequent analysis. 
-
-### How does it work?
-
-To-be-written
 
 ## License
 [MIT](https://github.com/fastly/insights.js/blob/master/LICENSE)

@@ -1,7 +1,6 @@
-Fastly Insights.js
-Build: [hash]
-Generated: [date]
-https://github.com/fastly/insights.js
+Performance Observer Polyfill
+Version: [version]
+https://github.com/fastly/performance-observer-polyfill
 
 Copyright (c) [year], Fastly, Inc. All rights reserved.
 

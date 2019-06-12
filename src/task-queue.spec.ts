@@ -225,9 +225,7 @@ describe("PerformanceObserverTaskQueue", (): void => {
 
   describe("#remove", (): void => {
     const [fixture] = Array.from(observersFixture);
-    const mockRegisteredObservers: Set<
-      PollingPerformanceObserver
-    > = new Set();
+    const mockRegisteredObservers: Set<PollingPerformanceObserver> = new Set();
     const taskQueue = new PollingPerformanceObserverTaskQueue({
       registeredObservers: mockRegisteredObservers
     });

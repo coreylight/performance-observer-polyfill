@@ -1,5 +1,7 @@
 module.exports = {
-  clearMocks: true,
   coverageDirectory: "coverage",
-  moduleNameMapper: {}
+  moduleNameMapper: {},
+  transform: {
+    "^.+\\.ts$": "babel-jest"
+  }
 };

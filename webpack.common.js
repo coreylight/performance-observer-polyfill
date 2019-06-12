@@ -1,10 +1,7 @@
 const path = require('path');
-
-const CleanWebpackPlugin = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  entry: './src/index.ts',
   module: {
     rules: [
       {
@@ -27,18 +24,14 @@ module.exports = {
     extensions: ['.ts', '.js']
   },
   plugins: [
-    new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
-      title: 'Insights.js',
-      template: path.resolve(__dirname, 'src', 'index.html')
+      title: 'Performance Observer Polyfill'
     })
   ],
   output: {
-    library: 'FASTLY',
-    libraryTarget: 'var',
-    libraryExport: 'default',
-    filename: '[name].[hash].js',
-    path: path.resolve(__dirname, 'dist'),
-    publicPath: '/'
+    library: 'PerformanceOberserverPolyfill',
+    libraryTarget: 'umd',
+    filename: 'index.js',
+    path: path.resolve(__dirname, 'dist')
   }
 };

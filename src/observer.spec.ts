@@ -46,7 +46,6 @@ describe("PerformanceObserver", (): void => {
   it("should default to using the global task queue", (): void => {
     const observer = new PerformanceObserver(callbackFixture);
     expect(observer).toHaveProperty("taskQueue");
-    // expect(observer.taskQueue).toBeInstanceOf(PerformanceObserverTaskQueue.mo);
   });
 
   describe("#observe", (): void => {

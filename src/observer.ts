@@ -27,12 +27,6 @@ class PerformanceObserver implements PollingPerformanceObserver {
     this.taskQueue = taskQueue;
   }
 
-  /**
-   *
-   * @param options - This is a PerformanceObserverInit dictionary,
-   *   with an entryTypes property which is an array of DOMString objects.
-   *   None of these are easily modeled in node.
-   */
   public observe(options?: PerformanceObserverInit): void {
     if (!options || !options.entryTypes) {
       throw new Error(ERRORS["no-entry-types"]);
