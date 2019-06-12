@@ -1,23 +1,12 @@
-interface Entry {
-  name: string;
-  type: string;
-}
-
-type ObserverCallback = (
-  // entryList: typeof import("../entry-list"),
-  entryList: any, // FIXME: above is not working.
-  observer: Observer
-) => void;
-
-interface Observer {
-  buffer: Set<Entry>;
-  callback?: ObserverCallback;
+interface PollingPerformanceObserver extends PerformanceObserver {
+  buffer: Set<PerformanceEntry>;
+  callback: PerformanceObserverCallback;
   entryTypes: string[];
 }
 
 interface PerformanceObserverTaskQueueOptions {
-  registeredObservers?: Set<Observer>;
-  processedEntries?: Set<Entry>;
+  registeredObservers?: Set<PollingPerformanceObserver>;
+  processedEntries?: Set<PerformanceEntry>;
   interval?: number;
   context?: any;
 }

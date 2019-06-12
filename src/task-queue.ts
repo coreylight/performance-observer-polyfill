@@ -1,10 +1,10 @@
 import EntryList from "./entry-list";
 
-class PerformanceObserverTaskQueue {
-  private registeredObservers: Set<Observer>;
-  private processedEntries: Set<Entry>;
+class PollingPerformanceObserverTaskQueue {
+  private registeredObservers: Set<PollingPerformanceObserver>;
+  private processedEntries: Set<PerformanceEntry>;
   private interval: number;
-  private intervalId: any; // Node and Browsers have different types for this.
+  private intervalId: number | null;
   private context: any;
 
   public constructor({
@@ -20,23 +20,25 @@ class PerformanceObserverTaskQueue {
     this.intervalId = null;
   }
 
-  public getNewEntries(): Entry[] {
+  public getNewEntries(): PerformanceEntry[] {
     const entries = this.context.performance.getEntries();
     return entries.filter(
-      (entry: Entry): boolean => !this.processedEntries.has(entry)
+      (entry: PerformanceEntry): boolean => !this.processedEntries.has(entry)
     );
   }
 
   public getObserversForType(
-    observers: Set<Observer>,
+    observers: Set<PollingPerformanceObserver>,
     type: string
-  ): Observer[] {
-    return Array.from(observers).filter((observer: Observer): boolean => {
-      return observer.entryTypes.some((t): boolean => t === type);
-    });
+  ): PollingPerformanceObserver[] {
+    return Array.from(observers).filter(
+      (observer: PollingPerformanceObserver): boolean => {
+        return observer.entryTypes.some((t): boolean => t === type);
+      }
+    );
   }
 
-  public processBuffer(observer: Observer): void {
+  public processBuffer(observer: PollingPerformanceObserver): void {
     const entries = Array.from(observer.buffer);
     const entryList = new EntryList(entries);
     observer.buffer.clear();
@@ -50,14 +52,10 @@ class PerformanceObserverTaskQueue {
     const entries = this.getNewEntries();
 
     entries.forEach((entry): void => {
-      // Get interested observers for entry type
-      // QUESTION: an entry object didn't seem to have an entryType, only a type
-      // therefore the old version of this code (next line), seems to be a bug?
-      // const { entryType: type } = entry;
-      const { type } = entry;
+      const { entryType } = entry;
       const observers = this.getObserversForType(
         this.registeredObservers,
-        type
+        entryType
       );
       // Add the entry to observer buffer
       observers.forEach((observer): void => {
@@ -68,12 +66,16 @@ class PerformanceObserverTaskQueue {
     });
 
     // Queue task to process all observer buffers
-    requestAnimationFrame((): void => {
+    const task = (): void =>
       this.registeredObservers.forEach(this.processBuffer);
-    });
+    if ("requestAnimationFrame" in this.context) {
+      this.context.requestAnimationFrame(task);
+    } else {
+      this.context.setTimeout(task, 0);
+    }
   }
 
-  public add(observer: Observer): void {
+  public add(observer: PollingPerformanceObserver): void {
     this.registeredObservers.add(observer);
 
     if (this.registeredObservers.size === 1) {
@@ -81,7 +83,7 @@ class PerformanceObserverTaskQueue {
     }
   }
 
-  public remove(observer: Observer): void {
+  public remove(observer: PollingPerformanceObserver): void {
     this.registeredObservers.delete(observer);
 
     if (!this.registeredObservers.size) {
@@ -90,15 +92,15 @@ class PerformanceObserverTaskQueue {
   }
 
   public observe(): void {
-    this.intervalId = setInterval(
+    this.intervalId = this.context.setInterval(
       this.processEntries.bind(this),
       this.interval
     );
   }
 
   public disconnect(): void {
-    this.intervalId = clearInterval(this.intervalId);
+    this.intervalId = this.context.clearInterval(this.intervalId);
   }
 }
 
-export default PerformanceObserverTaskQueue;
+export default PollingPerformanceObserverTaskQueue;

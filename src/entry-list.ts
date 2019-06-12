@@ -1,21 +1,23 @@
-export default class EntryList {
-  private entries: Entry[];
+export default class EntryList extends Array<PerformanceEntry>
+  implements PerformanceEntryList {
+  private _entries: PerformanceEntry[];
 
-  public constructor(entries: Entry[]) {
-    this.entries = entries;
+  public constructor(entries: PerformanceEntry[]) {
+    super(...entries);
+    this._entries = entries;
   }
 
-  public getEntries(): Entry[] {
-    return this.entries;
+  public getEntries(): PerformanceEntry[] {
+    return this._entries;
   }
 
-  public getEntriesByType(type: string): Entry[] {
-    return this.entries.filter((e): boolean => e.type === type);
+  public getEntriesByType(type: string): PerformanceEntry[] {
+    return this._entries.filter((e): boolean => e.entryType === type);
   }
 
-  public getEntriesByName(name: string, type?: string): Entry[] {
-    return this.entries
+  public getEntriesByName(name: string, type?: string): PerformanceEntry[] {
+    return this._entries
       .filter((e): boolean => e.name === name)
-      .filter((e): boolean => (type ? e.type === type : true));
+      .filter((e): boolean => (type ? e.entryType === type : true));
   }
 }

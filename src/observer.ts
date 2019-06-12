@@ -1,4 +1,5 @@
-import PerformanceObserverTaskQueue from "./task-queue.js";
+import PerformanceObserverTaskQueue from "./task-queue";
+import EntryList from "./entry-list";
 
 const VALID_TYPES = ["mark", "measure", "navigation", "resource"];
 const ERRORS = {
@@ -6,25 +7,24 @@ const ERRORS = {
   "invalid-entry-types": `Failed to execute 'observe' on 'PerformanceObserver': A Performance Observer MUST have at least one valid entryType in its entryTypes attribute.`
 };
 
-// FIXME
-type ObserverCallback = (entryList: any, observer: any) => void;
-
 const isValidType = (type: string): boolean =>
-  VALID_TYPES.some(t => type === t);
+  VALID_TYPES.some((t): boolean => type === t);
 
 const globalTaskQueue = new PerformanceObserverTaskQueue();
 
-class PerformanceObserver implements Observer {
-  callback?: ObserverCallback;
-  entryTypes: string[] = [];
-  buffer: Set<Entry>; // FIXME: used?
-  taskQueue: PerformanceObserverTaskQueue;
+class PerformanceObserver implements PollingPerformanceObserver {
+  public callback: PerformanceObserverCallback;
+  public buffer: Set<PerformanceEntry>;
+  public entryTypes: string[] = [];
+  private taskQueue: PerformanceObserverTaskQueue;
 
-  public constructor(callback: ObserverCallback, taskQueue = globalTaskQueue) {
-    this.callback = callback || null;
+  public constructor(
+    callback: PerformanceObserverCallback,
+    taskQueue = globalTaskQueue
+  ) {
+    this.callback = callback;
     this.buffer = new Set();
-    // this.taskQueue: PerformanceObserverTaskQueue = taskQueue;
-    this.taskQueue = new PerformanceObserverTaskQueue();
+    this.taskQueue = taskQueue;
   }
 
   /**
@@ -33,8 +33,8 @@ class PerformanceObserver implements Observer {
    *   with an entryTypes property which is an array of DOMString objects.
    *   None of these are easily modeled in node.
    */
-  observe(options: any) {
-    if (!options.entryTypes) {
+  public observe(options?: PerformanceObserverInit): void {
+    if (!options || !options.entryTypes) {
       throw new Error(ERRORS["no-entry-types"]);
     }
 
@@ -46,11 +46,16 @@ class PerformanceObserver implements Observer {
 
     this.entryTypes = entryTypes;
 
-    this.taskQueue.add(this as Observer);
+    this.taskQueue.add(this);
   }
 
-  disconnect() {
-    this.taskQueue.remove(this as Observer);
+  public disconnect(): void {
+    this.taskQueue.remove(this);
+  }
+
+  public takeRecords(): PerformanceEntryList {
+    const entries = Array.from(this.buffer);
+    return new EntryList(entries);
   }
 }
 
